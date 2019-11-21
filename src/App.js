@@ -11,6 +11,8 @@ const App = () => {
   const [pageNumber, setPageNumber] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalResults, setTotalResults] = useState(1)
+  const [searchInputFor, setSearchInputFor] = useState('')
+  const [searchFor, setSearchFor] = useState('')
 
   // const mySetPageNumber = (page) => {
   //   switch
@@ -19,19 +21,56 @@ const App = () => {
   // let totalResults
   // let totalPages
 
-  const getMovieDataFromAPI = async () => {
+  const getMovieDataFromAPI = async buttonClass => {
     // const resp = await axios.get(
     //   'https://api.themoviedb.org/3/discover/movie?primary_release_year=1989&sort_by=popularity.desc&api_key=5a39bf29dd3b617bf0c511dbf50b9b2d'
     // )
-    const resp = await axios.get(
-      'https://api.themoviedb.org/3/discover/movie?primary_release_year=1989&sort_by=' +
+    let searchMode = 'discover'
+    console.log(
+      'buttonClass: ' +
+        buttonClass +
+        ', searchFor: "' +
+        searchFor +
+        '", searchInputFor: "' +
+        searchInputFor +
+        '", sortBy: ' +
         sortBy +
-        '.' +
+        ', sortOrder: ' +
         sortOrder +
-        '&page=' +
+        ', pageNumber: ' +
         pageNumber +
-        '&api_key=5a39bf29dd3b617bf0c511dbf50b9b2d'
+        ', pageInputNumber: ' +
+        pageInputNumber
     )
+    // if (typeof buttonClass !== 'undefined') {
+    //   if (buttonClass === 'searchForText' && searchFor != '') {
+    //     searchMode = 'search'
+    //   }
+    // }
+    if (searchFor != '') {
+      searchMode = 'search'
+    }
+    console.log('searchMode: ' + searchMode)
+
+    let queryKeyValue
+    if (searchMode === 'search') {
+      queryKeyValue = '&query=' + searchFor
+    } else {
+      queryKeyValue = ''
+    }
+    const apiURL =
+      'https://api.themoviedb.org/3/' +
+      searchMode +
+      '/movie?primary_release_year=1989&sort_by=' +
+      sortBy +
+      '.' +
+      sortOrder +
+      '&page=' +
+      pageNumber +
+      queryKeyValue +
+      '&api_key=5a39bf29dd3b617bf0c511dbf50b9b2d'
+    console.log('api: ' + apiURL)
+    const resp = await axios.get(apiURL)
     setTotalResults(resp.data.total_results)
     setTotalPages(resp.data.total_pages)
     setMovieData(resp.data.results)
@@ -51,7 +90,7 @@ const App = () => {
 
   useEffect(() => {
     getMovieDataFromAPI()
-  }, [sortBy, sortOrder, pageNumber, totalPages])
+  }, [sortBy, sortOrder, pageNumber, totalPages, searchFor])
 
   return (
     <>
@@ -70,14 +109,13 @@ const App = () => {
         &nbsp;in&nbsp;
         <select
           name="sortOrder"
+          defaultValue="desc"
           onChange={e => {
             setSortOrder(e.target.value)
           }}
         >
           <option value="asc">ascending</option>
-          <option value="desc" selected>
-            descending
-          </option>
+          <option value="desc">descending</option>
         </select>
         &nbsp;order&nbsp;&nbsp;&nbsp;
         <button
@@ -93,7 +131,7 @@ const App = () => {
         </button>
         &nbsp;&nbsp;
         <button
-          class="gotoPage"
+          className="gotoPage"
           onClick={e => {
             if (pageInputNumber < 1 || pageInputNumber > totalPages) {
               setPageInputNumber(pageNumber)
@@ -124,6 +162,29 @@ const App = () => {
         >
           &gt;
         </button>
+        &nbsp;&nbsp;&nbsp;
+        <button
+          className="searchForText"
+          onClick={e => {
+            if (searchInputFor !== '') {
+              setPageInputNumber(1)
+              setPageNumber(1)
+              setSearchFor(searchInputFor)
+              getMovieDataFromAPI(e.target.className)
+            } else {
+              setSearchFor('')
+            }
+          }}
+        >
+          Search for
+        </button>
+        <input
+          type="text"
+          value={searchInputFor}
+          onChange={e => {
+            setSearchInputFor(e.target.value)
+          }}
+        />
       </p>
       <section className="mainContainer">
         <section className="moviesContainer">

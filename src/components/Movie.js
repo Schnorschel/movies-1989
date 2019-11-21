@@ -7,7 +7,7 @@ const Movie = props => {
     <section className="movieContainer">
       <img align="left" src={imgPath + props.imgSrc} alt={props.title} />
       <h2>{props.title}</h2>
-      <p>Rating: {props.popularity.toFixed(1)}</p>
+      <p>Popularity: {props.popularity.toFixed(1)}</p>
       <p>Release Date: {moment(props.releaseDate).format('Do MMM YY')}</p>
       <p>{props.overview}</p>
     </section>
